@@ -146,7 +146,7 @@ class user:
     ## User function
     def searchAll(self):
         print("---COURSES---")
-        cursor.execute("""SELECT * FROM COURSE""")
+        cursor.execute("""SELECT * FROM COURSE""")  #query structure and sqlite syntax taken from assignment 2
         query_result = cursor.fetchall()
         for i in query_result:
             print(i)
@@ -157,7 +157,7 @@ class user:
         choice = input("1 for CRN, 2 for Department, 3 for Day of the week, 4 for year, 5 for Credits: ")
         if choice == '1':
             find = input("Enter the CRN you are searching for: ")
-            cursor.execute("""SELECT * FROM COURSE WHERE CRN = %s""" % (find))
+            cursor.execute("""SELECT * FROM COURSE WHERE CRN = %s""" % (find))  #finds exact match
             query_result = cursor.fetchall()
             for i in query_result:
                 print(i)
@@ -169,7 +169,7 @@ class user:
                 print(i)
         elif choice == '3':
             find = input("Enter the Day of the week you are searching for: ")
-            cursor.execute("SELECT * FROM COURSE WHERE DAYS LIKE '%" + find + "%'")     ## find = 'w'    LIKE '%w%'
+            cursor.execute("SELECT * FROM COURSE WHERE DAYS LIKE '%" + find + "%'")  #finds similar results
             query_result = cursor.fetchall()
             for i in query_result:
                 print(i)
@@ -222,10 +222,6 @@ class student(user):  # inheritance is done with the ()
         # for i in query_result:
         #     print(i)
 
-    def searchCourses(self, CRN):
-        pass  # allows the function to be empty
-
-
     ## Class function to update the schedule of a student. Prompts input from user and updates student's attributes. Updates database accordingly
     def modifySchedule(self):
         self.updateCourse(self.id)
@@ -249,11 +245,6 @@ class student(user):  # inheritance is done with the ()
                     cursor.execute("UPDATE SCHEDULE SET COURSE0" + str(i+1) + " = 0 WHERE ID = " + str(self.id))
                     printTable("SCHEDULE")
                     break
-                
-
-
-    def printSchedule(self):
-        pass
 
 class instructor(user):
     uac = 2
@@ -301,15 +292,6 @@ class admin(user):
     def removeCourse(self):
         courseID = input("CRN: ")
         query = cursor.execute("DELETE FROM COURSE WHERE CRN = " + courseID)
-
-    def manageUsers(self):
-        pass
-
-    def overrideStudent(self):
-        pass
-
-    def search(self):
-        pass
 
 ####################################
 
