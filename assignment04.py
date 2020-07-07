@@ -127,7 +127,7 @@ def setupDB():
     cursor.execute("""INSERT INTO ADMIN VALUES(30002, 'Malala', 'Yousafzai', 'Registrar', 'Wentworth 101', 'yousafzaim');""")
 
     # Course list
-    cursor.execute("""Insert INTO COURSE VALUES ('OOPS', 42069, 'BSCO', 'Carpenter', '10:00am - 11:20am', 'MW', 'Spring', 2020, 5);""")
+    cursor.execute("""Insert INTO COURSE VALUES ('OOPS', 5555, 'BSCO', 'Carpenter', '10:00am - 11:20am', 'MW', 'Spring', 2020, 5);""")
     cursor.execute("""Insert INTO COURSE VALUES ('APC', 1337, 'BSCO', 'Turing', '2:00pm - 3:20pm', 'TR', 'Summer', 2018, 3);""")
     cursor.execute("""Insert INTO COURSE VALUES ('ADCD', 48324, 'BSEE', 'Fourier', '8:00am - 9:20am', 'TR', 'Summer', 2020, 4);""")
     cursor.execute("""Insert INTO COURSE VALUES ('Calculus 5', 21488, 'BSAS', 'Galilei', '10:00am - 11:20am', 'MWF', 'Spring', 2020, 5);""")
