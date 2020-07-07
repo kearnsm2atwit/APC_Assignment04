@@ -259,18 +259,27 @@ class instructor(user):
     uac = 2
     schedule = [0, 0, 0, 0, 0, 0]
 
+    def updateCourse(self, id):
+        studentRow = getRow(id, "SCHEDULE")
+        for i in range(1, len(studentRow)):
+            self.course[i-1] = int(studentRow[i])
+        ## check database and update course array accordingly
+
+
     def printSchedule(self):
 
-        ## Simple query to get all CRNs from schedule table. Need to have info from each CRN returned as well
-        cursor.execute("SELECT * FROM SCHEDULE WHERE ID = " + str(self.id))
+        ## Simple query to get all records based on instructor's courses
+        for i in range(1, len(self.schedule)):
+            query = cursor.execute("SELECT * FROM COURSE WHERE CRN = " + str(self.schedule[i]))
+            for i in query:
+                print(i)
 
-        pass
-
+    ## Query to return Student IDs that are registered for a course
     def printRoster(self):
-        pass
-
-    def searchCourses(self):
-        pass
+        CRN = input("CRN: ")
+        query = cursor.execute("SELECT ID FROM SCHEDULE WHERE COURSE01 = " + CRN + " OR COURSE02 = " + CRN + " OR COURSE03 = " + CRN + " OR COURSE04 = " + CRN + " OR COURSE05 = " + CRN + " OR COURSE06 = " + CRN)
+        for i in query:
+            print(i)
 
 class admin(user):
     uac = 3
@@ -303,7 +312,6 @@ class admin(user):
         pass
 
 ####################################
-## Global functions to help with database connection
 
 ## Print entire table. Only needs the table name as parameter
 def printTable(tableName):
@@ -433,8 +441,6 @@ def menu(user):
 
 ## Main function to organize better. Logs user in, allows user to reset/setup DB, exit, or go to user menu
 def main():
-    setupDB()
-    setupSchedule()
     testUser = login()
     while(True):
         print("\n\n-----------Main Menu------------")
