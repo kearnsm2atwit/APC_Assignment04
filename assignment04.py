@@ -25,7 +25,7 @@ def setupDB():
 
     ######################################################################
     # SQL command to create a table in the database
-    sql_command = """CREATE TABLE STUDENT (  
+    sql_command = """CREATE TABLE STUDENT (
     ID 		INT 	PRIMARY KEY 	NOT NULL,
     NAME		TEXT	NOT NULL,
     SURNAME		TEXT 	NOT NULL,
@@ -38,7 +38,7 @@ def setupDB():
     cursor.execute(sql_command)
     ######################################################################
     # SQL command to create a table in the database
-    sql_command = """CREATE TABLE INSTRUCTOR (  
+    sql_command = """CREATE TABLE INSTRUCTOR (
     ID 		INT 	PRIMARY KEY 	NOT NULL,
     NAME		TEXT	NOT NULL,
     SURNAME		TEXT 	NOT NULL,
@@ -53,7 +53,7 @@ def setupDB():
 
     ######################################################################
     # SQL command to create a table in the database
-    sql_command = """CREATE TABLE ADMIN (  
+    sql_command = """CREATE TABLE ADMIN (
     ID 		INT 	PRIMARY KEY 	NOT NULL,
     NAME		TEXT	NOT NULL,
     SURNAME		TEXT 	NOT NULL,
@@ -67,7 +67,7 @@ def setupDB():
 
     ######################################################################
     # SQL command to create a table in the database
-    sql_command = """CREATE TABLE COURSE (  
+    sql_command = """CREATE TABLE COURSE (
     TITLE       TEXT        NOT NULL,
     CRN         INT         PRIMARY KEY NOT NULL,
     DEPT        CHAR (4)    NOT NULL,
@@ -185,7 +185,9 @@ class user:
             query_result = cursor.fetchall()
             for i in query_result:
                 print(i)
-
+#This is the base for the login for all users.
+#It assigns space for a first name, last name, and id number.
+#The print function displays the name and ID on two separate lines.
     def setfirstName(self, a):
         self.firstName = a
 
@@ -201,7 +203,7 @@ class user:
 
 class student(user):  # inheritance is done with the ()
     uac = 1
-    course = [0, 0, 0, 0, 0, 0]    
+    course = [0, 0, 0, 0, 0, 0]
 
     def updateCourse(self, id):
         studentRow = getRow(id, "SCHEDULE")
@@ -233,7 +235,7 @@ class student(user):  # inheritance is done with the ()
             for i in range(0, len(self.course)):
                 if(self.course[i] == 0):
                     self.course[i] = CRN
-                    query = cursor.execute("UPDATE SCHEDULE SET COURSE0" + str(i+1) + " = " + str(CRN) + " WHERE ID = " + str(self.id)) 
+                    query = cursor.execute("UPDATE SCHEDULE SET COURSE0" + str(i+1) + " = " + str(CRN) + " WHERE ID = " + str(self.id))
                     print(getRow(self.id, "SCHEDULE"))
                     break
 
@@ -271,12 +273,13 @@ class instructor(user):
         query = cursor.execute("SELECT ID FROM SCHEDULE WHERE COURSE01 = " + CRN + " OR COURSE02 = " + CRN + " OR COURSE03 = " + CRN + " OR COURSE04 = " + CRN + " OR COURSE05 = " + CRN + " OR COURSE06 = " + CRN)
         for i in query:
             print(i)
-
+#Class admin: inherits from user and can add course and remove course
 class admin(user):
     uac = 3
     def __init__(self, id):
         self.id = id
-
+#add course function takes input from user and sets it to variables which are then executed as an insert in the query line.
+#This adds all necessary information to fill out the table in the database and create a fully functioning course.
     def addCourse(self):
         courseName = input("Course Name: ")
         courseID = input("Course ID: ")
@@ -288,7 +291,8 @@ class admin(user):
         year = input("Year: ")
         credits = input("Credits: ")
         query = cursor.execute("INSERT INTO COURSE VALUES ('" + courseName + "', " + courseID + ", '" + departmentName + "', '" + instructorName + "', '" + time + "', '" + day + "', '" + semester + "', " + year + ", " + credits + ")")
-
+#remove course is a lot simpler than add, as it searches just for the CRN and removes the entry that matches in the table.
+#The query line executes the remove using only the course id, or CRN
     def removeCourse(self):
         courseID = input("CRN: ")
         query = cursor.execute("DELETE FROM COURSE WHERE CRN = " + courseID)
@@ -366,7 +370,7 @@ def login():
         print("Access Denied")
         exit()
 
-## Logout simply ends the program
+## Logout simply ends the program by exiting
 def logout():
     print("You are now logged out")
     sys.exit(0)
