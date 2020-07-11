@@ -345,6 +345,11 @@ def setupSchedule():
 ## Login will create a user based on their ID. Will create the appropriate user (Student, Instructor, Admin) based on ID given
 def login():
     uid = input("Enter your user ID: ")
+    try:
+        val = int(uid)
+    except ValueError:
+        print("Enter a valid user ID")
+        main()
     cursor.execute("""SELECT EXISTS(SELECT * FROM STUDENT WHERE ID = %s)""" % (uid))
     query_result = cursor.fetchall()
     x = str(query_result)
