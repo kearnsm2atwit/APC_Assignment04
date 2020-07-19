@@ -201,6 +201,13 @@ class user:
         print("Name: ", self.firstName, self.lastName)
         print("ID: ", self.idNumber)
 
+    def printCourses(self):
+        print("\n\n\t\t\t\t---COURSES---\n")
+        printTable("COURSE")
+
+
+
+
 class student(user):  # inheritance is done with the ()
     uac = 1
     course = [0, 0, 0, 0, 0, 0]
@@ -216,13 +223,10 @@ class student(user):  # inheritance is done with the ()
         self.updateCourse(self.id)
 
 
-    def printCourses(self):
-        print("\n\n\t\t\t\t---COURSES---\n")
-        printTable("COURSE")
-        # cursor.execute("""SELECT * FROM COURSE""")
-        # query_result = cursor.fetchall()
-        # for i in query_result:
-        #     print(i)
+    def printSchedule(self):
+        self.updateCourse(self.id)
+        for i in range(0, len(self.course)):
+            print(getCourse(str(self.course[i])))
 
     ## Class function to update the schedule of a student. Prompts input from user and updates student's attributes. Updates database accordingly
     def modifySchedule(self):
@@ -278,6 +282,10 @@ class admin(user):
     uac = 3
     def __init__(self, id):
         self.id = id
+
+
+
+
 #add course function takes input from user and sets it to variables which are then executed as an insert in the query line.
 #This adds all necessary information to fill out the table in the database and create a fully functioning course.
     def addCourse(self):
@@ -296,6 +304,27 @@ class admin(user):
     def removeCourse(self):
         courseID = input("CRN: ")
         query = cursor.execute("DELETE FROM COURSE WHERE CRN = " + courseID)
+
+
+    def addStudent(self):
+        id = input("Student ID: ")
+        name = input("Student Name: ")
+        surname = input("Student Surname: ")
+        gradyear = input("Graduation Year: ")
+        major = input("Major: ")
+        email = input("Email: ")
+        query = cursor.execute("INSERT INTO STUDENT VALUES ("+id+", '"+name+"', '"+surname+"', "+gradyear+", '"+major+"', '"+email+"')")
+
+    def addInstructor(self):
+        id = input("Instructor ID: ")
+        name = input("Instructor Name: ")
+        surname = input("Instructor Surname: ")
+        title = input("Instructor Title: ")
+        hireyear = input("Year Hired: ")
+        dept = input("Department: ")
+        email = input("Email: ")
+        query = cursor.execute("INSERT INTO INSTRUCTOR VALUES ("+id+", '"+name+"', '"+surname+"', '"+title+"', "+hireyear+", '"+dept+"', '"+email+"')")
+
 
 ####################################
 
@@ -325,10 +354,24 @@ def getRow(ID, table):
         returnValue = temp_returnValue.split(", ")
     return returnValue
 
+def getCourse(CRN):
+    returnValue = []
+    query = cursor.execute("SELECT * FROM COURSE WHERE CRN = " + CRN + "")
+    for i in query:
+        temp_returnValue = str(i)
+        temp_returnValue = temp_returnValue.strip("(),")
+        returnValue = temp_returnValue.split(", ")
+    return returnValue
+
 ## Takes a singular ID and creates a new row in the schedule table. All 6 courses are set to 0 by default
 ## This could be changed to just run inside the setupDB() function
+def defaultCourses(ID):
+    query = cursor.execute("UPDATE SCHEDULE SET COURSE01 = 5555, COURSE02 = 1337, COURSE03 = 32157 WHERE ID = " + ID)
+
 def populateSchedule(ID):
     query = cursor.execute("INSERT INTO SCHEDULE VALUES(" + str(ID) + ", 0, 0, 0, 0, 0, 0)")
+    defaultCourses(ID)
+
 
 ## Setup the schedule table helper function
 ## This also could be moved to setupDB() in the future
@@ -383,7 +426,7 @@ def logout():
 ## Menu function based on user attributes. Needs user object as parameter
 def menu(user):
     if user.uac == 1:
-        swit =input("1. Modify your schedule\n2. View all courses\n3. Search courses based on a parameter\n4. logout\nEnter: ")
+        swit =input("1. Modify your schedule\n2. View all courses\n3. Search courses based on a parameter\n4. Print Schedule\n5. Exit\nEnter: ")
         if swit == '1':
             user.modifySchedule()
         elif swit == '2':
@@ -391,6 +434,8 @@ def menu(user):
         elif swit == '3':
             user.searchParam()
         elif swit == '4':
+            user.printSchedule()
+        elif swit == '5':
             logout()
         else:
             print("Error: Enter a valid number")
@@ -410,25 +455,33 @@ def menu(user):
             print("Error: Enter a valid number")
             menu(user)
     if user.uac == 3:
-        swit =input("1. Add or Remove a course from the schedule\n2. View all courses\n3. Search courses based on a parameter\n4. Log out\nEnter: ")
-        if swit == '1':
-            swit2 = input("1. Add a course\n2. Remove a course: ")
-            if swit2 == '1':
-                user.addCourse()
-            elif swit2 =='2':
-                user.removeCourse()
+            swit =input("1. Add or Remove a course from the schedule\n2. View all courses\n3. Search courses based on a parameter\n4. Add student or instructor\n5. Log out\nEnter: ")
+            if swit == '1':
+                swit2 = input("1. Add a course\n2. Remove a course: ")
+                if swit2 == '1':
+                    user.addCourse()
+                elif swit2 == '2':
+                    user.removeCourse()
+                else:
+                    print("Enter a valid number")
+            elif swit == '2':
+                user.searchAll()
+            elif swit == '3':
+                user.searchParam()
+            elif swit == '4':
+                swit2 = input("1 for student, 2 for instructor: ")
+                if swit2 == '1':
+                    user.addStudent()
+                elif swit2 == '2':
+                    user.addInstructor()
+                else:
+                    print("Error: Enter a valid number")
+                    menu(user)
+            elif swit == '5':
+                logout()
             else:
-                print("Enter a valid number")
-        elif swit == '2':
-            user.searchAll()
-        elif swit == '3':
-            user.searchParam()
-        elif swit == '4':
-            logout()
-        else:
-            print("Error: Enter a valid number")
-            menu(user)
-
+                print("Error: Enter a valid number")
+                menu(user)
 
 ## Main function to organize better. Logs user in, allows user to reset/setup DB, exit, or go to user menu
 def main():
