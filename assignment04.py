@@ -134,14 +134,27 @@ def setupDB():
     cursor.execute("""Insert INTO COURSE VALUES ('Discrete Math', 32157, 'BSME', 'Bernoulli', '11:30am - 1:20pm', 'TWR', 'Fall', 2020, 4);""")
 
 class user:
+    def updateCourse(self, id):
+        studentRow = getRow(id, "SCHEDULE")
+        for i in range(1, len(studentRow)):
+            self.course[i-1] = int(studentRow[i])
+        ## check database and update course array accordingly
 
     ## Class attributes for id
     id = 0
+    course = [0, 0, 0, 0, 0, 0]
     ## Constructor for student. Needs to pass ID. ID will most likely get passed immediately after login
     ## This constructor is passed down through inheritance to student, instructor, and admin
     def __init__(self, id):
         self.id = id
+        updateCourse(self.id)
 
+    def getCourseIDs(self):
+        tempValue = []
+        courses = getColumn("CRN", "COURSE")
+        for i in courses:
+            tempValue.append(i)
+        return tempValue
 
     ## User function
     def searchAll(self):
@@ -207,16 +220,24 @@ class user:
 
     ## Class function to update the schedule of a student. Prompts input from user and updates student's attributes. Updates database accordingly
     def modifySchedule(self):
+        potentialCourses = self.getCourseIDs()
         self.updateCourse(self.id)
         choice = input("1: Add Course\n2: Remove Course\n")
-        CRN = input("CRN: ")
 
 
         if(choice == "1"):
+            print("\nValid CRNs: ")
+            for i in range(0, len(potentialCourses)):
+                print(potentialCourses[i])
+            CRN = input("CRN: ")
             for i in range(0, len(self.course)):
                 if (CRN == str(self.course[i])):
                     print("You are already registered for: " + CRN)
                     return
+            for i in range(0, len(potentialCourses)):
+                if (potentialCourses.index(CRN) == -1):
+                    print("Invalid CRN. Try again.")
+                    return        
             for i in range(0, len(self.course)):
                 if(self.course[i] == 0):
                     self.course[i] = CRN
@@ -226,24 +247,21 @@ class user:
             print("Schedule already full")
 
         elif(choice == "2"):
+            print("Current courses: ")
+            for i in range(0, len(self.course)):
+                print(self.course[i])
+            CRN = input("\nCRN: ")
             for i in range(0, len(self.course)):
                 if(str(self.course[i]) == CRN):
                     self.course[i] = 0
                     cursor.execute("UPDATE SCHEDULE SET COURSE0" + str(i+1) + " = 0 WHERE ID = " + str(self.id))
-                    printTable("SCHEDULE")
+                    ##printTable("SCHEDULE")
                     return
             print("You are not registered for: " + CRN)
 
 
-class student(user):  # inheritance is done with the ()
+class student(user):  # inheritance is done within the ()
     uac = 1
-    course = [0, 0, 0, 0, 0, 0]
-
-    def updateCourse(self, id):
-        studentRow = getRow(id, "SCHEDULE")
-        for i in range(1, len(studentRow)):
-            self.course[i-1] = int(studentRow[i])
-        ## check database and update course array accordingly
 
     def __init__(self, id):
         self.id = id
@@ -259,7 +277,6 @@ class student(user):  # inheritance is done with the ()
 
 class instructor(user):
     uac = 2
-    course = [0, 0, 0, 0, 0, 0]
 
     def updateCourse(self, id):
         studentRow = getRow(id, "SCHEDULE")
@@ -272,7 +289,7 @@ class instructor(user):
 
         ## Simple query to get all records based on instructor's courses
         for i in range(1, len(self.schedule)):
-            query = cursor.execute("SELECT * FROM COURSE WHERE CRN = " + str(self.schedule[i]))
+            query = cursor.execute("SELECT * FROM COURSE WHERE CRN = " + str(self.course[i]))
             for i in query:
                 print(i)
 
@@ -443,6 +460,7 @@ def logout():
 ## Menu function based on user attributes. Needs user object as parameter
 def menu(user):
     if user.uac == 1:
+        user.getCourseIDs()
         swit =input("1. Modify your schedule\n2. View all courses\n3. Search courses based on a parameter\n4. Print Schedule\n5. Exit\nEnter: ")
         if swit == '1':
             user.modifySchedule()
@@ -523,7 +541,6 @@ def main():
 
         ## After every iteration, update the database for any potential changes that may have been made
         database.commit()
-
 
 ## Should eventually create a function to setup/reset DB if it does not exist yet
 ## call main function
