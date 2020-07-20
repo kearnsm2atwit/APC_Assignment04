@@ -211,23 +211,28 @@ class user:
         choice = input("1: Add Course\n2: Remove Course\n")
         CRN = input("CRN: ")
 
-        if(choice == "1"):
 
+        if(choice == "1"):
+            for i in range(0, len(self.course)):
+                if (CRN == str(self.course[i])):
+                    print("You are already registered for: " + CRN)
+                    return
             for i in range(0, len(self.course)):
                 if(self.course[i] == 0):
                     self.course[i] = CRN
                     query = cursor.execute("UPDATE SCHEDULE SET COURSE0" + str(i+1) + " = " + str(CRN) + " WHERE ID = " + str(self.id))
                     print(getRow(self.id, "SCHEDULE"))
-                    break
-
+                    return
+            print("Schedule already full")
 
         elif(choice == "2"):
             for i in range(0, len(self.course)):
-                if(self.course[i] == CRN):
+                if(str(self.course[i]) == CRN):
                     self.course[i] = 0
                     cursor.execute("UPDATE SCHEDULE SET COURSE0" + str(i+1) + " = 0 WHERE ID = " + str(self.id))
                     printTable("SCHEDULE")
-                    break
+                    return
+            print("You are not registered for: " + CRN)
 
 
 class student(user):  # inheritance is done with the ()
