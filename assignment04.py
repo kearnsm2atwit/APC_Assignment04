@@ -205,29 +205,6 @@ class user:
         print("\n\n\t\t\t\t---COURSES---\n")
         printTable("COURSE")
 
-
-
-
-class student(user):  # inheritance is done with the ()
-    uac = 1
-    course = [0, 0, 0, 0, 0, 0]
-
-    def updateCourse(self, id):
-        studentRow = getRow(id, "SCHEDULE")
-        for i in range(1, len(studentRow)):
-            self.course[i-1] = int(studentRow[i])
-        ## check database and update course array accordingly
-
-    def __init__(self, id):
-        self.id = id
-        self.updateCourse(self.id)
-
-
-    def printSchedule(self):
-        self.updateCourse(self.id)
-        for i in range(0, len(self.course)):
-            print(getCourse(str(self.course[i])))
-
     ## Class function to update the schedule of a student. Prompts input from user and updates student's attributes. Updates database accordingly
     def modifySchedule(self):
         self.updateCourse(self.id)
@@ -252,9 +229,32 @@ class student(user):  # inheritance is done with the ()
                     printTable("SCHEDULE")
                     break
 
+
+class student(user):  # inheritance is done with the ()
+    uac = 1
+    course = [0, 0, 0, 0, 0, 0]
+
+    def updateCourse(self, id):
+        studentRow = getRow(id, "SCHEDULE")
+        for i in range(1, len(studentRow)):
+            self.course[i-1] = int(studentRow[i])
+        ## check database and update course array accordingly
+
+    def __init__(self, id):
+        self.id = id
+        self.updateCourse(self.id)
+
+
+    def printSchedule(self):
+        self.updateCourse(self.id)
+        for i in range(0, len(self.course)):
+            print(getCourse(str(self.course[i])))
+
+
+
 class instructor(user):
     uac = 2
-    schedule = [0, 0, 0, 0, 0, 0]
+    course = [0, 0, 0, 0, 0, 0]
 
     def updateCourse(self, id):
         studentRow = getRow(id, "SCHEDULE")
@@ -324,6 +324,18 @@ class admin(user):
         dept = input("Department: ")
         email = input("Email: ")
         query = cursor.execute("INSERT INTO INSTRUCTOR VALUES ("+id+", '"+name+"', '"+surname+"', '"+title+"', "+hireyear+", '"+dept+"', '"+email+"')")
+
+    def linkCourse(self):
+        id = input("Enter individual's ID")
+        if id[0] == '1':
+            kid = student(id)
+            kid.modifySchedule()
+        elif id[0] == '2':
+            adult = instructor(id)
+            adult.modifySchedule()
+        else:
+            print("Enter a valid number")
+            user.linkCourse()
 
 
 ####################################
@@ -455,7 +467,7 @@ def menu(user):
             print("Error: Enter a valid number")
             menu(user)
     if user.uac == 3:
-            swit =input("1. Add or Remove a course from the schedule\n2. View all courses\n3. Search courses based on a parameter\n4. Add student or instructor\n5. Log out\nEnter: ")
+            swit =input("1. Add or Remove a course from the schedule\n2. View all courses\n3. Search courses based on a parameter\n4. Add student or instructor\n5. Link or unlink courses\n6. Log out\nEnter: ")
             if swit == '1':
                 swit2 = input("1. Add a course\n2. Remove a course: ")
                 if swit2 == '1':
@@ -478,6 +490,8 @@ def menu(user):
                     print("Error: Enter a valid number")
                     menu(user)
             elif swit == '5':
+                user.linkCourse()
+            elif swit == '6':
                 logout()
             else:
                 print("Error: Enter a valid number")
