@@ -127,11 +127,12 @@ def setupDB():
     cursor.execute("""INSERT INTO ADMIN VALUES(30002, 'Malala', 'Yousafzai', 'Registrar', 'Wentworth 101', 'yousafzaim');""")
 
     # Course list
-    cursor.execute("""Insert INTO COURSE VALUES ('OOPS', 5555, 'BSCO', 'Carpenter', '10:00am - 11:20am', 'MW', 'Spring', 2020, 5);""")
-    cursor.execute("""Insert INTO COURSE VALUES ('APC', 1337, 'BSCO', 'Turing', '2:00pm - 3:20pm', 'TR', 'Summer', 2018, 3);""")
-    cursor.execute("""Insert INTO COURSE VALUES ('ADCD', 48324, 'BSEE', 'Fourier', '8:00am - 9:20am', 'TR', 'Summer', 2020, 4);""")
-    cursor.execute("""Insert INTO COURSE VALUES ('Calculus 5', 21488, 'BSAS', 'Galilei', '10:00am - 11:20am', 'MWF', 'Spring', 2020, 5);""")
-    cursor.execute("""Insert INTO COURSE VALUES ('Discrete Math', 32157, 'BSME', 'Bernoulli', '11:30am - 1:20pm', 'TWR', 'Fall', 2020, 4);""")
+    cursor.execute("""Insert INTO COURSE VALUES ('OOPS', 5555, 'BSCO', 'Carpenter', '10:00am - 11:00am', 'MW', 'Spring', 2020, 5);""")
+    cursor.execute("""Insert INTO COURSE VALUES ('APC', 1337, 'BSCO', 'Turing', '2:00pm - 3:00pm', 'TR', 'Summer', 2018, 3);""")
+    cursor.execute("""Insert INTO COURSE VALUES ('ADCD', 48324, 'BSEE', 'Fourier', '8:00am - 9:00am', 'TR', 'Summer', 2020, 4);""")
+    cursor.execute("""Insert INTO COURSE VALUES ('Calculus 5', 21488, 'BSAS', 'Galilei', '10:00am - 11:00am', 'MWF', 'Spring', 2020, 5);""")
+    cursor.execute("""Insert INTO COURSE VALUES ('Discrete Math', 32157, 'BSME', 'Bernoulli', '11:30am - 1:30pm', 'TWR', 'Fall', 2020, 4);""")
+    cursor.execute("""Insert INTO COURSE VALUES ('Linear Algebra', 3200, 'MATH', 'Morrow', '10:00am - 12:00pm', 'MW', 'Spring', 2020, 4);""")
 
 class user:
     def updateCourse(self, id):
@@ -147,7 +148,7 @@ class user:
     ## This constructor is passed down through inheritance to student, instructor, and admin
     def __init__(self, id):
         self.id = id
-        updateCourse(self.id)
+        self.updateCourse(self.id)
 
     def getCourseIDs(self):
         tempValue = []
@@ -230,21 +231,24 @@ class user:
             for i in range(0, len(potentialCourses)):
                 print(potentialCourses[i])
             CRN = input("CRN: ")
+
             for i in range(0, len(self.course)):
                 if (CRN == str(self.course[i])):
                     print("You are already registered for: " + CRN)
                     return
             for i in range(0, len(potentialCourses)):
-                if (potentialCourses.index(CRN) == -1):
-                    print("Invalid CRN. Try again.")
-                    return        
-            for i in range(0, len(self.course)):
-                if(self.course[i] == 0):
-                    self.course[i] = CRN
-                    query = cursor.execute("UPDATE SCHEDULE SET COURSE0" + str(i+1) + " = " + str(CRN) + " WHERE ID = " + str(self.id))
-                    print(getRow(self.id, "SCHEDULE"))
+                try:
+                    potentialCourses.index(CRN) == -1
+                    for i in range(0, len(self.course)):
+                        if(self.course[i] == 0):
+                            self.course[i] = CRN
+                            query = cursor.execute("UPDATE SCHEDULE SET COURSE0" + str(i+1) + " = " + str(CRN) + " WHERE ID = " + str(self.id))
+                            print(getRow(self.id, "SCHEDULE"))
+                            return
+                    print("Schedule already full")
+                except:
+                    print("Invalid CRN. Try again")
                     return
-            print("Schedule already full")
 
         elif(choice == "2"):
             print("Current courses: ")
@@ -273,8 +277,38 @@ class student(user):  # inheritance is done within the ()
         for i in range(0, len(self.course)):
             print(getCourse(str(self.course[i])))
 
+    ## Need to check if any courses overlap
+    def scheduleConflicts(self):
 
-
+        ## Need to get the courses user is currently registered for
+        ## Make sure the current self.course array is the same as whats in the DB
+        self.updateCourse(self.id)
+        ## Now that we have a copy of the courses registered in DB, get a list of the info on each course
+        courseInfo = []
+        for i in range(0, len(self.course)):
+            courseInfo.append(getCourse(self.course[i]))
+        
+        for i in range(0, len(courseInfo)):
+            for j in range(0, len(courseInfo)):
+                ## We only want to compare registered courses. courseInfo will always have 6 courses, some just might be empty
+                if (len(courseInfo[i]) > 0): 
+                    print("Test " + str(i))
+                    ##print(courseInfo[i])
+                    ## Now that we have info on the courses the user is registered in, check if any fall on the same day
+                    ##print(courseInfo[i][5])
+                    ## M is Monday, T is Tuesday, W is Wednesday, R is Thursday, and F is Friday
+                    for char in courseInfo[i][5]:
+                        if(courseInfo[j][5].find(char) != -1 and i != j):
+                            ## Save the class hours in a variable so we can check the times
+                            firstTime = courseInfo[i][4]
+                            print(firstTime)
+                            secondTime = courseInfo[j][4]
+                            print(secondTime)
+                            ## Now, we have found an instance where the user has two classes on the same day
+                            return
+                        else:
+                            continue
+                    print("No conflicts")
 class instructor(user):
     uac = 2
 
@@ -288,7 +322,7 @@ class instructor(user):
     def printSchedule(self):
 
         ## Simple query to get all records based on instructor's courses
-        for i in range(1, len(self.schedule)):
+        for i in range(1, len(self.course)):
             query = cursor.execute("SELECT * FROM COURSE WHERE CRN = " + str(self.course[i]))
             for i in query:
                 print(i)
@@ -296,17 +330,18 @@ class instructor(user):
     ## Query to return Student IDs that are registered for a course
     def printRoster(self):
         CRN = input("CRN: ")
+        print("Student IDs Registered for " + str(CRN) + ": ")
         query = cursor.execute("SELECT ID FROM SCHEDULE WHERE COURSE01 = " + CRN + " OR COURSE02 = " + CRN + " OR COURSE03 = " + CRN + " OR COURSE04 = " + CRN + " OR COURSE05 = " + CRN + " OR COURSE06 = " + CRN)
         for i in query:
-            print(i)
+            temp_returnValue = str(i)
+            temp_returnValue = temp_returnValue.strip("(),")
+            print(temp_returnValue)
+
 #Class admin: inherits from user and can add course and remove course
 class admin(user):
     uac = 3
     def __init__(self, id):
         self.id = id
-
-
-
 
 #add course function takes input from user and sets it to variables which are then executed as an insert in the query line.
 #This adds all necessary information to fill out the table in the database and create a fully functioning course.
@@ -390,7 +425,7 @@ def getRow(ID, table):
 
 def getCourse(CRN):
     returnValue = []
-    query = cursor.execute("SELECT * FROM COURSE WHERE CRN = " + CRN + "")
+    query = cursor.execute("SELECT * FROM COURSE WHERE CRN = " + str(CRN) + "")
     for i in query:
         temp_returnValue = str(i)
         temp_returnValue = temp_returnValue.strip("(),")
@@ -404,7 +439,8 @@ def defaultCourses(ID):
 
 def populateSchedule(ID):
     query = cursor.execute("INSERT INTO SCHEDULE VALUES(" + str(ID) + ", 0, 0, 0, 0, 0, 0)")
-    defaultCourses(ID)
+    if (int(ID) < 20000):
+        defaultCourses(ID)
 
 
 ## Setup the schedule table helper function
@@ -450,7 +486,7 @@ def login():
         return admin(uid)
     else:
         print("Access Denied")
-        exit()
+        login()
 
 ## Logout simply ends the program by exiting
 def logout():
@@ -461,7 +497,7 @@ def logout():
 def menu(user):
     if user.uac == 1:
         user.getCourseIDs()
-        swit =input("1. Modify your schedule\n2. View all courses\n3. Search courses based on a parameter\n4. Print Schedule\n5. Exit\nEnter: ")
+        swit =input("1. Modify your schedule\n2. View all courses\n3. Search courses based on a parameter\n4. Print Schedule\n5. Check for schedule conflicts\n6. Exit\nEnter: ")
         if swit == '1':
             user.modifySchedule()
         elif swit == '2':
@@ -471,6 +507,8 @@ def menu(user):
         elif swit == '4':
             user.printSchedule()
         elif swit == '5':
+            user.scheduleConflicts()
+        elif swit == '6':
             logout()
         else:
             print("Error: Enter a valid number")
@@ -479,6 +517,7 @@ def menu(user):
         swit = input("1. Assemble and print course schedule\n2. View all courses\n3. Search courses based on a parameter\n4. Log out\nEnter: ")
         if swit == '1':
             user.printRoster()
+            print("\n--------SCHEDULE--------")
             user.printSchedule()
         elif swit == '2':
             user.searchAll()
