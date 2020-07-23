@@ -130,7 +130,7 @@ def setupDB():
     cursor.execute("""Insert INTO COURSE VALUES ('OOPS', 5555, 'BSCO', 'Carpenter', '10:00am - 11:00am', 'MW', 'Spring', 2020, 5);""")
     cursor.execute("""Insert INTO COURSE VALUES ('APC', 1337, 'BSCO', 'Turing', '2:00pm - 3:00pm', 'TR', 'Summer', 2018, 3);""")
     cursor.execute("""Insert INTO COURSE VALUES ('ADCD', 48324, 'BSEE', 'Fourier', '8:00am - 9:00am', 'TR', 'Summer', 2020, 4);""")
-    cursor.execute("""Insert INTO COURSE VALUES ('Calculus 5', 21488, 'BSAS', 'Galilei', '10:00am - 11:00am', 'MWF', 'Spring', 2020, 5);""")
+    cursor.execute("""Insert INTO COURSE VALUES ('Calculus 5', 21488, 'BSAS', 'Galilei', '10:00am - 12:00am', 'MWF', 'Spring', 2020, 5);""")
     cursor.execute("""Insert INTO COURSE VALUES ('Discrete Math', 32157, 'BSME', 'Bernoulli', '11:30am - 1:30pm', 'TWR', 'Fall', 2020, 4);""")
     cursor.execute("""Insert INTO COURSE VALUES ('Linear Algebra', 3200, 'MATH', 'Morrow', '10:00am - 12:00pm', 'MW', 'Spring', 2020, 4);""")
 
@@ -279,7 +279,8 @@ class student(user):  # inheritance is done within the ()
 
     ## Need to check if any courses overlap
     def scheduleConflicts(self):
-
+        self.updateCourse(self.id)
+        conflictFlag = 0
         ## Need to get the courses user is currently registered for
         ## Make sure the current self.course array is the same as whats in the DB
         self.updateCourse(self.id)
@@ -292,7 +293,7 @@ class student(user):  # inheritance is done within the ()
         for i in range(0, len(courseInfo)):
             for j in range(i, len(courseInfo)):
                 ## We only want to compare registered courses. courseInfo will always have 6 courses, some just might be empty
-                if (len(courseInfo[i]) > 0 and len(courseInfo[j])):
+                if (len(courseInfo[i]) > 0 and len(courseInfo[j]) > 0):
                     tempFirstClass = courseInfo[i]
                     tempSecondClass = courseInfo[j]
                     #print("Test " + str(i))
@@ -330,10 +331,13 @@ class student(user):  # inheritance is done within the ()
                                 print("Class conflict: ")
                                 print(tempFirstClass)
                                 print(tempSecondClass)
-                                return
+                                conflictFlag = 1
                         else:
                             continue
-        print("No conflicts")
+        if(conflictFlag == 0):
+            print("No conflicts")
+        else:
+            print("No other conflicts")
 
 
 ## Instructor class. Inherits user attributes and functions. May not use all user functions though
