@@ -288,27 +288,55 @@ class student(user):  # inheritance is done within the ()
         for i in range(0, len(self.course)):
             courseInfo.append(getCourse(self.course[i]))
         
+        ## Now that we have a list of courseInfo based on the user's registered courses
         for i in range(0, len(courseInfo)):
-            for j in range(0, len(courseInfo)):
+            for j in range(i, len(courseInfo)):
                 ## We only want to compare registered courses. courseInfo will always have 6 courses, some just might be empty
-                if (len(courseInfo[i]) > 0): 
-                    print("Test " + str(i))
-                    ##print(courseInfo[i])
-                    ## Now that we have info on the courses the user is registered in, check if any fall on the same day
-                    ##print(courseInfo[i][5])
+                if (len(courseInfo[i]) > 0 and len(courseInfo[j])):
+                    tempFirstClass = courseInfo[i]
+                    tempSecondClass = courseInfo[j]
+                    #print("Test " + str(i))
                     ## M is Monday, T is Tuesday, W is Wednesday, R is Thursday, and F is Friday
                     for char in courseInfo[i][5]:
                         if(courseInfo[j][5].find(char) != -1 and i != j):
                             ## Save the class hours in a variable so we can check the times
                             firstTime = courseInfo[i][4]
-                            print(firstTime)
+                            #print(firstTime)
                             secondTime = courseInfo[j][4]
-                            print(secondTime)
-                            ## Now, we have found an instance where the user has two classes on the same day
-                            return
+                            #print(secondTime)
+                            firstTime = firstTime.split(" - ")
+                            #print(firstTime)
+                            secondTime = secondTime.split(" - ")
+                            #print(secondTime)
+
+                            for i in range(0, len(firstTime)):
+                                firstTime[i] = timeToInt(firstTime[i])
+                            
+                            for i in range(0, len(secondTime)):
+                                secondTime[i] = timeToInt(secondTime[i])
+
+
+                            ## Now that we have an easy way of comparing times, check to see if they overlap
+                            ## They will only overlap if the start time of the second is before the end of the first
+                            if(firstTime[0] <= secondTime[0]):
+                                earlyTime = firstTime
+                                lateTime = secondTime
+                            else:
+                                earlyTime = secondTime
+                                lateTime = firstTime
+                            #print(earlyTime)
+                            #print(lateTime)
+                            if(earlyTime[1] > lateTime[0]):
+                                print("Class conflict: ")
+                                print(tempFirstClass)
+                                print(tempSecondClass)
+                                return
                         else:
                             continue
-                    print("No conflicts")
+        print("No conflicts")
+
+
+## Instructor class. Inherits user attributes and functions. May not use all user functions though
 class instructor(user):
     uac = 2
 
@@ -492,6 +520,25 @@ def login():
 def logout():
     print("You are now logged out")
     sys.exit(0)
+
+
+def timeToInt(string):
+    if(string.find("pm") != -1):
+        string = string.replace("'", "")
+        string = string.replace("pm", "")
+        string = string.replace(":", "")
+        intString = int(string)
+        ## If the class is at noon, do not add 1200
+        if(intString != 1200):
+            intString = intString + 1200
+
+    else:
+        string = string.replace("'", "")
+        string = string.replace("am", "")
+        string = string.replace(":", "")
+        intString = int(string)
+    return intString
+
 
 ## Menu function based on user attributes. Needs user object as parameter
 def menu(user):
