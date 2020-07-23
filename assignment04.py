@@ -98,10 +98,6 @@ def setupDB():
     # execute the statement
     cursor.execute(sql_command)
 
-
-
-
-
     # Student list
     cursor.execute("""INSERT INTO STUDENT VALUES(10001, 'Isaac', 'Newton', 1668, 'BSAS', 'newtoni');""")
     cursor.execute("""INSERT INTO STUDENT VALUES(10002, 'Marie', 'Curie', 1903, 'BSAS', 'curiem');""")
@@ -403,6 +399,7 @@ class admin(user):
         major = input("Major: ")
         email = input("Email: ")
         query = cursor.execute("INSERT INTO STUDENT VALUES ("+id+", '"+name+"', '"+surname+"', "+gradyear+", '"+major+"', '"+email+"')")
+        populateSchedule(id)
 
     def addInstructor(self):
         id = input("Instructor ID: ")
@@ -473,7 +470,6 @@ def populateSchedule(ID):
     query = cursor.execute("INSERT INTO SCHEDULE VALUES(" + str(ID) + ", 0, 0, 0, 0, 0, 0)")
     if (int(ID) < 20000):
         defaultCourses(ID)
-
 
 ## Setup the schedule table helper function
 ## This also could be moved to setupDB() in the future
