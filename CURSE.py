@@ -340,13 +340,6 @@ class student(user):  # inheritance is done within the ()
 class instructor(user):
     uac = 2
 
-    def updateCourse(self, id):
-        studentRow = getRow(id, "SCHEDULE")
-        for i in range(1, len(studentRow)):
-            self.course[i-1] = int(studentRow[i])
-        ## check database and update course array accordingly
-
-
     def printSchedule(self):
 
         ## Simple query to get all records based on instructor's courses
